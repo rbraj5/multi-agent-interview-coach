@@ -1,0 +1,17 @@
+{
+  "role": "Junior Data Analyst",
+  "level": "Junior",
+  "topic": "Python and SQL",
+  "turns": [
+    {
+      "question": "How would you check a dataset for missing values before modelling?",
+      "answer": "I would use pandas isna and sum, then decide how to fill or remove values.",
+      "feedback": "Good practical answer. Add how you would decide between median, mode, or dropping rows."
+    }
+  ],
+  "roadmap": [
+    "Practice explaining preprocessing decisions with tradeoffs.",
+    "Prepare one project story using the STAR format."
+  ]
+}
+
