@@ -1,41 +1,43 @@
 # Multi-Agent Interview Coach
 
-A Streamlit app for practicing junior-level interviews with a small multi-agent workflow.
+Multi-Agent Interview Coach is a Streamlit application for structured interview practice and feedback generation. It coordinates question generation, answer evaluation, and improvement planning into a repeatable review workflow.
 
-Agents:
+## Operational Context
 
-- Question Generator
-- Answer Evaluator
-- Feedback Coach
+The system supports interview preparation, mentoring, and skills-development sessions where consistent feedback is useful across candidates or practice rounds. It stores a local JSON session log for auditability and follow-up review.
 
-The app works without paid APIs and saves a simple `interview_log.json` session file.
+## Agent Workflow
 
-## Features
+- **Question Generator:** creates role, level, and topic-specific practice questions.
+- **Answer Evaluator:** scores answers using detail, reasoning, and practical-context signals.
+- **Feedback Coach:** produces an improvement roadmap based on the evaluated answers.
 
-- Choose role, experience level, and topic
-- Generate five practice questions
-- Write answers directly in the app
-- Receive per-answer feedback
-- Get a final improvement roadmap
-- Download the session log as JSON
+## Capabilities
 
-## Project Structure
+- Role, level, and topic configuration
+- Five generated practice questions per session
+- Structured answer capture
+- Per-answer feedback and scoring
+- Final improvement roadmap
+- Downloadable JSON session log
+
+## Repository Structure
 
 ```text
 multi-agent-interview-coach/
-├── app.py
-├── sample_data/
-│   └── sample_interview_log.json
-├── screenshots/
-│   └── .gitkeep
-├── .env.example
-├── .gitignore
-├── LICENSE
-├── README.md
-└── requirements.txt
+|-- app.py
+|-- sample_data/
+|   `-- sample_interview_log.json
+|-- screenshots/
+|   `-- .gitkeep
+|-- .env.example
+|-- .gitignore
+|-- LICENSE
+|-- README.md
+`-- requirements.txt
 ```
 
-## Setup
+## Local Run
 
 ```powershell
 python -m venv .venv
@@ -44,11 +46,14 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Usage
+## Usage Flow
 
-1. Select a target role, level, and topic.
-2. Generate questions.
-3. Write answers.
-4. Review feedback and the final roadmap.
-5. Download the JSON session log.
+1. Launch the Streamlit application.
+2. Select the target role, experience level, and interview topic.
+3. Generate the practice question set.
+4. Capture candidate answers.
+5. Review feedback, improvement roadmap, and exported session log.
 
+## Notes
+
+Feedback is generated through deterministic scoring rules. The output is designed as a coaching aid rather than a final assessment of candidate suitability.

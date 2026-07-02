@@ -30,7 +30,7 @@ QUESTION_BANK = {
         "What is overfitting?",
         "Why is feature scaling useful for some models?",
         "How would you evaluate a classification model?",
-        "How would you explain a model result to a non-technical user?",
+        "How would you explain a model result to a non-technical stakeholder?",
     ],
     "General Software": [
         "How do you approach a bug you have not seen before?",
@@ -92,7 +92,7 @@ def feedback_coach(feedback_items: list[Feedback]) -> list[str]:
         roadmap.append("Prepare two project examples before the interview.")
     else:
         roadmap.append("Keep using concrete examples and add measurable outcomes where possible.")
-        roadmap.append("Practice follow-up questions that challenge your assumptions.")
+        roadmap.append("Practice follow-up questions that challenge the stated assumptions.")
     roadmap.append("Review weak answers and rewrite them with one technical detail and one business outcome.")
     return roadmap
 
@@ -124,7 +124,7 @@ def build_session_log(role: str, level: str, topic: str, questions: list[str], a
 
 
 def main() -> None:
-    st.set_page_config(page_title="Multi-Agent Interview Coach", page_icon="🎙️", layout="wide")
+    st.set_page_config(page_title="Multi-Agent Interview Coach", layout="wide")
     st.title("Multi-Agent Interview Coach")
 
     role = st.text_input("Target role", "Junior Data Analyst")
@@ -137,7 +137,7 @@ def main() -> None:
     st.subheader("Question Generator")
     for index, question in enumerate(questions, start=1):
         st.markdown(f"**Question {index}.** {question}")
-        answers.append(st.text_area(f"Your answer {index}", key=f"answer_{index}", height=90))
+        answers.append(st.text_area(f"Candidate answer {index}", key=f"answer_{index}", height=90))
 
     if st.button("Evaluate answers", type="primary"):
         session_log = build_session_log(role, level, topic, questions, answers)

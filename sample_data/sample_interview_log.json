@@ -6,7 +6,7 @@
     {
       "question": "How would you check a dataset for missing values before modelling?",
       "answer": "I would use pandas isna and sum, then decide how to fill or remove values.",
-      "feedback": "Good practical answer. Add how you would decide between median, mode, or dropping rows."
+      "feedback": "Good practical answer. Add the decision criteria for median, mode, or row removal."
     }
   ],
   "roadmap": [
@@ -14,4 +14,3 @@
     "Prepare one project story using the STAR format."
   ]
 }
-
