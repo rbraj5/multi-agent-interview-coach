@@ -9,11 +9,14 @@ The system supports interview preparation, mentoring, and skills-development ses
 ## LangGraph Workflow
 
 ```text
-generate_questions -> evaluate_answers -> build_feedback_plan -> export_session_log
+generate_questions -> evaluate_answers -> review_readiness
+review_readiness -> practice_review? -> build_feedback_plan -> export_session_log
 ```
 
 - **generate_questions:** creates role, level, and topic-specific practice questions.
 - **evaluate_answers:** scores answers using detail, reasoning, and practical-context signals.
+- **review_readiness:** checks average score, weak answers, and incomplete responses before coaching.
+- **practice_review:** routes weak sessions through targeted practice guidance before final planning.
 - **build_feedback_plan:** creates a deterministic or LLM-assisted improvement roadmap.
 - **export_session_log:** writes a structured JSON session log for review.
 
@@ -29,8 +32,16 @@ generate_questions -> evaluate_answers -> build_feedback_plan -> export_session_
 - Structured answer capture
 - LangGraph node execution trace in the UI
 - Per-answer feedback and scoring
+- Conditional readiness routing for weak or incomplete sessions
+- Risk flags and focus areas for targeted practice
 - Final improvement roadmap
 - Downloadable JSON session log
+
+## Production Design Notes
+
+The application keeps interview evaluation deterministic by default: rubric scoring, readiness routing, and session logs are produced locally and are reproducible. Optional LLM synthesis is limited to wording the final coaching report from structured feedback, not making hiring decisions.
+
+In a production mentoring or talent-development workflow, the next additions would be calibrated rubrics by role family, reviewer notes, consent controls, longitudinal progress tracking, and human review for high-stakes evaluation.
 
 ## Repository Structure
 

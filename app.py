@@ -46,6 +46,13 @@ def main() -> None:
                 st.write(turn.feedback)
                 st.write(turn.next_step)
 
+        st.subheader("Readiness Review")
+        st.json(state["readiness_review"].model_dump())
+
+        with st.expander("Graph Trace", expanded=False):
+            for event in state["trace_events"]:
+                st.write(f"**{event.node}:** {event.summary}")
+
         st.subheader("Feedback Coach")
         st.markdown(state["feedback_plan"].report)
         for item in state["feedback_plan"].roadmap:

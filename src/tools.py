@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from src.schemas import Feedback, FeedbackPlan, InterviewTurn
+from src.schemas import Feedback, FeedbackPlan, InterviewTurn, ReadinessReview
 
 QUESTION_BANK = {
     "Python": [
@@ -44,10 +44,15 @@ def generate_questions(role: str, level: str, topic: str) -> list[str]:
 def evaluate_answer(answer: str) -> Feedback:
     cleaned = answer.strip()
     if not cleaned:
-        return Feedback(score=0, message="No answer provided.", next_step="Write a short answer with one concrete example.")
+        return Feedback(
+            score=0,
+            message="No answer provided.",
+            next_step="Write a short answer with one concrete example.",
+            signals=["missing_answer"],
+        )
 
     score = 2
-    positives = []
+    positives: list[str] = []
     if len(cleaned.split()) >= 25:
         score += 1
         positives.append("enough detail")
@@ -61,7 +66,7 @@ def evaluate_answer(answer: str) -> Feedback:
     score = min(score, 5)
     message = f"Good signs: {', '.join(positives)}." if positives else "The answer is understandable but needs more evidence."
     next_step = "Add a specific project example, explain the tradeoff, and mention how the result was checked."
-    return Feedback(score=score, message=message, next_step=next_step)
+    return Feedback(score=score, message=message, next_step=next_step, signals=positives or ["needs_evidence"])
 
 
 def evaluate_answers(questions: list[str], answers: list[str]) -> tuple[list[Feedback], list[InterviewTurn]]:
@@ -82,7 +87,53 @@ def evaluate_answers(questions: list[str], answers: list[str]) -> tuple[list[Fee
     return feedback_items, turns
 
 
-def build_feedback_plan(feedback_items: list[Feedback]) -> FeedbackPlan:
+def review_readiness(feedback_items: list[Feedback]) -> ReadinessReview:
+    if not feedback_items:
+        return ReadinessReview(
+            status="No answers evaluated",
+            average_score=0,
+            requires_practice_review=True,
+            risk_flags=["No interview answers were available for evaluation."],
+            focus_areas=["Answer at least one generated question."],
+        )
+
+    average = round(sum(item.score for item in feedback_items) / len(feedback_items), 2)
+    weak_indexes = [index for index, item in enumerate(feedback_items, start=1) if item.score < 3]
+    missing_answers = sum(1 for item in feedback_items if "missing_answer" in item.signals)
+    risk_flags: list[str] = []
+    focus_areas: list[str] = []
+
+    if missing_answers:
+        risk_flags.append(f"{missing_answers} answer(s) were missing.")
+        focus_areas.append("Complete all questions before using the final roadmap.")
+    if weak_indexes:
+        risk_flags.append(f"Weak answers at question(s): {', '.join(map(str, weak_indexes))}.")
+        focus_areas.append("Rewrite weak answers using situation, action, result, and validation.")
+    if average < 3:
+        focus_areas.append("Prepare two reusable project stories with measurable outcomes.")
+
+    if average >= 4 and not weak_indexes:
+        status = "Interview-ready practice session"
+        requires_review = False
+        focus_areas.append("Practice deeper follow-up questions and tradeoff explanations.")
+    elif average >= 3:
+        status = "Partial readiness with targeted follow-up"
+        requires_review = bool(weak_indexes)
+    else:
+        status = "Practice review required before interview use"
+        requires_review = True
+
+    return ReadinessReview(
+        status=status,
+        average_score=average,
+        requires_practice_review=requires_review,
+        weak_question_indexes=weak_indexes,
+        risk_flags=risk_flags,
+        focus_areas=focus_areas,
+    )
+
+
+def build_feedback_plan(feedback_items: list[Feedback], readiness: ReadinessReview | None = None) -> FeedbackPlan:
     if not feedback_items:
         roadmap = ["Answer at least one question to receive a roadmap."]
     else:
@@ -94,18 +145,40 @@ def build_feedback_plan(feedback_items: list[Feedback]) -> FeedbackPlan:
         else:
             roadmap.append("Keep using concrete examples and add measurable outcomes where possible.")
             roadmap.append("Practice follow-up questions that challenge the stated assumptions.")
+        if readiness is not None:
+            roadmap.extend(readiness.focus_areas[:3])
         roadmap.append("Review weak answers and rewrite them with one technical detail and one business outcome.")
 
-    report = "\n".join(["# Interview Feedback Plan", "", "## Roadmap", *[f"- {item}" for item in roadmap]])
-    return FeedbackPlan(roadmap=roadmap, report=report)
+    report_lines = ["# Interview Feedback Plan", "", "## Readiness"]
+    if readiness is None:
+        report_lines.append("- Status: not reviewed")
+    else:
+        report_lines.extend(
+            [
+                f"- Status: {readiness.status}",
+                f"- Average score: {readiness.average_score}/5",
+                f"- Practice review required: {'yes' if readiness.requires_practice_review else 'no'}",
+                f"- Risk flags: {'; '.join(readiness.risk_flags) or 'none'}",
+            ]
+        )
+    report_lines.extend(["", "## Roadmap", *[f"- {item}" for item in roadmap]])
+    return FeedbackPlan(roadmap=roadmap, report="\n".join(report_lines))
 
 
-def export_session_log(role: str, level: str, topic: str, turns: list[InterviewTurn], roadmap: list[str]) -> dict:
+def export_session_log(
+    role: str,
+    level: str,
+    topic: str,
+    turns: list[InterviewTurn],
+    roadmap: list[str],
+    readiness: ReadinessReview,
+) -> dict:
     return {
         "created_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "role": role,
         "level": level,
         "topic": topic,
         "turns": [turn.model_dump() for turn in turns],
+        "readiness_review": readiness.model_dump(),
         "roadmap": roadmap,
     }
