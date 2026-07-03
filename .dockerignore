@@ -1,0 +1,8 @@
+.git
+__pycache__
+*.pyc
+.venv
+.env
+interview_log.json
+screenshots
+tests/__pycache__
